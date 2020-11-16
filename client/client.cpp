@@ -48,10 +48,8 @@ int main(){
 
 		char input[1024];
 		cin >> input;
-        cout << input << endl;
 
 		if(strcmp(input,"LIST") == 0){
-            cout << "vao" << endl;
 			write(clientSocket,input,1024);
 
 		}
@@ -66,6 +64,9 @@ int main(){
 			write(clientSocket,input,1024);
 
 		}
+        else {
+            write(clientSocket,input,1024);
+        }
 
 	}
 

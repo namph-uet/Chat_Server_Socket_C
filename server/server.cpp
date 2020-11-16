@@ -87,8 +87,18 @@ void * doNetworking(void * ClientDetail){
 
 		}
 
+        if(read_len == 0) {
+            
+            close(clientSocket);
+            pthread_exit(0);
+        }
+
 	}
 
+    /* close socket and clean up */
+    std::cout << "client " << clientDetail->userID << " close the connection\n";
+	close(clientSocket);
+    pthread_exit(0);
 	return NULL;
 
 }
