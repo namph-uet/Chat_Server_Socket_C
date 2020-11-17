@@ -17,14 +17,18 @@ void * doRecieving(void * sockID){
 	int clientSocket = *((int *) sockID);
 
 	while(1){
-
 		char data[1024];
 		int read_len = read(clientSocket,data,1024);
 		data[read_len] = '\0';
-		printf("%s\n",data);
+		cout << "Message received: " << data <<endl;
 
+		if(read_len == 0) {
+			 /* close socket and clean up */
+			cout <<"server close the connection\n";
+			close(clientSocket);
+			pthread_exit(0);
+		}
 	}
-
 }
 
 int main(){
@@ -50,18 +54,22 @@ int main(){
 		cin >> input;
 
 		if(strcmp(input,"LIST") == 0){
+			cout << "Get list user request\n"; 
 			write(clientSocket,input,1024);
-
 		}
-		if(strcmp(input,"SEND") == 0){
+		else if(strcmp(input,"SEND") == 0){
 
 			write(clientSocket,input,1024);
-			
-			scanf("%s",input);
+
+			cout << "Enter userId to send meassage: " << n;
+		
+			cin >> input;
 			write(clientSocket,input,1024);
 			
-			scanf("%[^\n]s",input);
-			write(clientSocket,input,1024);
+			cout << "Enter meassage: ";
+			char message [1024];
+			cin >> message;
+			write(clientSocket,message,1024);
 
 		}
         else {
