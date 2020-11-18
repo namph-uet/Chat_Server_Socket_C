@@ -33,6 +33,7 @@ void removeClient(int index) {
 	for(int i = index; i <= clientCount; i++) {
 		Client[i] = Client[i+1];
 	}
+	std::cout << "xoa\n";
 	clientCount--;
 }
 
@@ -43,60 +44,65 @@ void * doNetworking(void * ClientDetail){
 	int clientSocket = clientDetail -> sockID;
     bool typing_user_id = true;
 	bool typing_mess = false;
+	char to_user[50]; 
     const std::string LOGGED_IN = "LOGGED IN";
 	const std::string HAVE_NOT_USER = "HAVE NOT USER";
 	const std::string SENT = "SENT YOUR MESSGAGE";
+	const std::string WRONG_SYN = "WRONG SYNTAX";
 	
 	while(1){
 
 		char data[1024];
 		bool have_user = false;
+		bool wrong = true;
 		int read_len = read(clientSocket,data,1024);
 		data[read_len] = '\0';
 
-        std::cout << "Received a message from the client " << clientDetail->userID
+        if(!typing_mess) std::cout << "Received a message from " << clientDetail->userID
           <<": " << data << std::endl;
-
-		char output[1024];
 
         if(typing_user_id) {
             strncpy(clientDetail->userID, data, read_len);
             write(clientSocket, LOGGED_IN.c_str(), LOGGED_IN.length());
             std:: cout << "Client " << clientDetail->userID << " connected" << std::endl;
             typing_user_id = false;
+			wrong = false;
         }
-
-		std::cout << clientCount << std::endl;
-
 		if(strcmp(data,"LIST") == 0){
 			for(int i = 0 ; i < clientCount; i ++){
-				std::cout << "i: " << i << std::endl;
+				std::cout << Client[i].userID << std::endl;
                 write(clientSocket, Client[i].userID, 50);
 			}
+			wrong = false;
 		}
-		if(strcmp(data,"SEND") == 0){
-
-			char to_user[50]; 
-			bzero(data, 1024);
+		else if(strcmp(data,"SEND") == 0){
 			read_len = read(clientSocket,to_user,50);
 			to_user[read_len] = '\0';
 			typing_mess = true;
 			std::cout << "to user: " << to_user << std::endl;
+			wrong = false;
 		}
 		else if(typing_mess) {
+			// read_len = read(clientSocket,data,1024);
+			data[read_len] = '\0';
 			std::cout << "message: " << data << std::endl;
 
 			for(int i = 0; i < clientCount; i++) {
-				if(strcmp(Client[i].userID, data) == 0) {
+				std::cout << "i: " << i << " " << Client[i].userID << std::endl;
+				if(strcmp(Client[i].userID, to_user) == 0) {
 					write(Client[i].sockID,data,1024);
 					write(clientSocket,SENT.c_str(),SENT.length());
 					have_user = true;
 					break;
 				}
 			}
+
+			wrong = false;
 			
 			if(!have_user) write(clientSocket,HAVE_NOT_USER.c_str(),HAVE_NOT_USER.length());
-			typing_mess = false;
+		} 
+		else if(wrong) {
+			write(clientSocket,WRONG_SYN.c_str(),WRONG_SYN.length());
 		}
 
 		if(read_len == 0) {
@@ -139,9 +145,8 @@ int main(){
 		Client[clientCount].sockID = accept(serverSocket, (struct sockaddr*) &Client[clientCount].clientAddr, (socklen_t *) &Client[clientCount].len);
 		Client[clientCount].index = clientCount;
 		
-		pthread_create(&thread[clientCount], NULL, doNetworking, (void *) &Client[clientCount]);
+		pthread_create(&thread[clientCount], 0, doNetworking, (void *) &Client[clientCount]);
 		clientCount ++;
-		std::cout <<"count: " << clientCount << std::endl;
 	}
 
 	for(int i = 0 ; i < clientCount ; i ++)

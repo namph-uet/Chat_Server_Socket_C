@@ -51,7 +51,9 @@ int main(){
 	while(1){
 
 		char input[1024];
-		cin >> input;
+		bool typing_mess = false;
+		cin.getline(input,'\n');
+		cin.clear();
 
 		if(strcmp(input,"LIST") == 0){
 			cout << "Get list user request\n"; 
@@ -60,17 +62,16 @@ int main(){
 		else if(strcmp(input,"SEND") == 0){
 
 			write(clientSocket,input,1024);
+			cout << "Enter userId to send meassage: ";
 
-			cout << "Enter userId to send meassage: " << n;
-		
-			cin >> input;
+			cin.getline(input,'\n');
 			write(clientSocket,input,1024);
-			
+
 			cout << "Enter meassage: ";
 			char message [1024];
-			cin >> message;
-			write(clientSocket,message,1024);
 
+			cin.getline(message,'\n');
+			write(clientSocket,message,sizeof(message));
 		}
         else {
             write(clientSocket,input,1024);
