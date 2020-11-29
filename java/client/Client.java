@@ -74,12 +74,7 @@ class ReadThread extends Thread {
         while (true) {
             try {
                 String response = reader.readLine();
-                System.out.println("\n" + response);
-
-                // prints the userID after displaying the server's message
-                if (client.getuserID() != null) {
-                    System.out.print("[" + client.getuserID() + "]: ");
-                }
+                System.out.println(response);
             } catch (IOException ex) {
                 System.out.println("Error reading from server: " + ex.getMessage());
                 ex.printStackTrace();
@@ -119,7 +114,7 @@ class WriteThread extends Thread {
         String message;
 
         do {
-            text = console.readLine("[" + userID + "]: ");
+            text = console.readLine();
             message = "~" + userID + "~" + text;
             writer.println(message);
 

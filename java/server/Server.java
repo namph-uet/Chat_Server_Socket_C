@@ -44,15 +44,21 @@ public class Server {
     /**
      * Delivers a message from one user to others (broadcasting)
      */
-    void broadcast(String message, String toUser) {
+    boolean broadcast(String message, String toUser) {
         System.out.println("send to " + toUser + " message: " + message);
-        if(toUser != null) userThreads.get(toUser).sendMessage(message);
+        if(toUser != null) {
+            if(userThreads.get(toUser) != null) {
+                userThreads.get(toUser).sendMessage(message);
+                return true;
+            }
+            else return false;
+        }
         else {
             userThreads.entrySet().stream().forEach(element -> {
                 element.getValue().sendMessage(message);
             });
+            return true;
         }
-
     }
 
 
@@ -70,6 +76,20 @@ public class Server {
      */
     boolean hasUsers(String userID) {
         return (userThreads.get(userID) != null);
+    }
+
+    /**
+     * log user online
+     */
+    public void logUserOnline() {
+        StringBuffer userOnline = new StringBuffer();
+        userOnline.append("user online:\n");
+        System.out.println("user online:");
+        userThreads.entrySet().stream().forEach(element -> {
+            System.out.println(element.getKey());
+            userOnline.append(element.getKey() + "\n");
+        });
+        broadcast(userOnline.toString(), null);
     }
 }
 
@@ -90,7 +110,7 @@ class UserThread extends Thread {
         try {
             InputStream input = socket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
- 
+
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
 
@@ -113,7 +133,7 @@ class UserThread extends Thread {
                     sendMessage("Wrong syntax!");
                 }
 
-                server.broadcast(strBuff.toString(), toUser);
+                if(!server.broadcast(strBuff.toString(), toUser)) writer.println("user not online");
 
             } while (!clientMessage.equals("bye"));
 
@@ -122,6 +142,7 @@ class UserThread extends Thread {
 
             serverMessage = userID + " has quitted.";
             server.broadcast(serverMessage, null);
+            server.logUserOnline();
 
         } catch (IOException ex) {
             System.out.println("Error in UserThread: " + ex.getMessage());
@@ -135,6 +156,7 @@ class UserThread extends Thread {
     void printUsers() {
         if (server.hasUsers(userID)) {
             writer.println("Connected users: " + userID);
+            server.logUserOnline();
         } else {
             writer.println("No other users connected");
         }
