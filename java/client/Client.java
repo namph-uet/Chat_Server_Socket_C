@@ -75,9 +75,12 @@ class ReadThread extends Thread {
             try {
                 String response = reader.readLine();
                 System.out.println(response);
+                if(response == null) {
+                    System.out.println("disconect to server");
+                    break;
+                }
             } catch (IOException ex) {
                 System.out.println("Error reading from server: " + ex.getMessage());
-                ex.printStackTrace();
                 break;
             }
         }
@@ -117,7 +120,7 @@ class WriteThread extends Thread {
             text = console.readLine();
             message = "~" + userID + "~" + text;
             writer.println(message);
-
+            System.out.println("Quit");
         } while (!text.equals("bye"));
 
         try {

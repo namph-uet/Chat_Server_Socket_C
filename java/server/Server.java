@@ -1,3 +1,5 @@
+// name: Phạm Hoàng Nam
+// mssv: 17021164
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -130,7 +132,10 @@ class UserThread extends Thread {
                     strBuff.delete(clientMessage.indexOf('['), clientMessage.indexOf(']') + 1);
                 }
                 catch(StringIndexOutOfBoundsException e) {
-                    sendMessage("Wrong syntax!");
+                    if(!clientMessage.equals("bye")) sendMessage("Wrong syntax!");
+                }
+                catch(NullPointerException e) {
+                    break;
                 }
 
                 if(!server.broadcast(strBuff.toString(), toUser)) writer.println("user not online");
